@@ -18,14 +18,14 @@ const Footer = () => {
             near you.
           </p>
           <p className="font-semibold text-gray text-xs">
-            Or call 000800-040-1966
+            Or call +34 673685542
           </p>
         </div>
 
         <div className="bg-neutral-700 my-5 h-[1px] w-full" />
 
         <div className="flex md:flex-row flex-col md:items-center justify-between">
-          <p className="font-semibold text-gray text-xs">Copright @ 2024 Apple Inc. All rights reserved.</p>
+          <p className="font-semibold text-gray text-xs">Copright @ 2024 Apple Inc & <a className='text-blue' href="https://www.duverxmobiledev.es/">DuverxDev</a>. All rights reserved.</p>
           <div className="flex">
             {footerLinks.map((link, i) => (
               <p key={link} className="font-semibold text-gray text-xs">
