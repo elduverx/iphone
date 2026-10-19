@@ -40,3 +40,27 @@ export const animateWithGsapTimeline = (timeline, rotationRef, rotationState, fi
     '<'
   )
 }
+// Revela en cascada los elementos de una cuadrícula a medida que entran en pantalla.
+// Usa IntersectionObserver (mide la posición real en cada momento) en vez de calcularla
+// al montar, que tras la hidratación del HTML pre-renderizado puede no ser la definitiva.
+export const animateBatch = (target, animationProps) => {
+  const elements = gsap.utils.toArray(target)
+  if (!elements.length || typeof IntersectionObserver === 'undefined') return
+
+  const observer = new IntersectionObserver((entries) => {
+    const visible = entries.filter((entry) => entry.isIntersecting).map((entry) => entry.target)
+    if (!visible.length) return
+    visible.forEach((el) => observer.unobserve(el))
+    gsap.to(visible, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: 'power2.out',
+      stagger: 0.08,
+      ...animationProps,
+    })
+  }, { rootMargin: '0px 0px -10% 0px' })
+
+  elements.forEach((el) => observer.observe(el))
+  return () => observer.disconnect()
+}

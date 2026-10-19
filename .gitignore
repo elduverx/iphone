@@ -23,5 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# Sentry Config File
-.env.sentry-build-plugin
+# Variables de entorno
+.env
+.env.local
+
+# Temporales del pre-render (vite-react-ssg)
+.vite-react-ssg-temp

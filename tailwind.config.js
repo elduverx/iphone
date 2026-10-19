@@ -12,6 +12,12 @@ export default {
           300: "#42424570",
         },
         zinc: "#101010",
+        forge: {
+          DEFAULT: "#FF6A1A",
+          light: "#FF9A5C",
+          dark: "#E04E0A",
+        },
+        ember: "#FFB36B",
       },
     },
   },
