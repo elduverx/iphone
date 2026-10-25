@@ -17,15 +17,26 @@ const line = (value, max = 300) => String(value ?? '').replace(/[\r\n]+/g, ' ').
 const text = (value, max) => String(value ?? '').trim().slice(0, max);
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
+// Email de una variable de entorno tal como suele pegarse en Vercel: con espacios, entre comillas
+// o con nombre ("Swiftcraft <info@ioscraft.app>"). Devuelve solo la dirección, o '' si no es válida.
+const envEmail = (value) => {
+  const raw = String(value ?? '').trim().replace(/^["']+|["']+$/g, '');
+  const address = (raw.match(/<([^>]+)>/)?.[1] ?? raw).trim();
+  return isEmail(address) ? address : '';
+};
 
 let transporter;
 const getTransporter = () => {
   const port = Number(process.env.SMTP_PORT || 465);
   transporter ??= nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host: process.env.SMTP_HOST.trim(),
     port,
     secure: port === 465,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    auth: { user: process.env.SMTP_USER?.trim(), pass: process.env.SMTP_PASS },
+    // por debajo del límite de la función en Vercel, para responder con un error claro y no con un 504
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 8000,
   });
   return transporter;
 };
@@ -57,9 +68,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ ok: false, error: 'invalid' });
   }
 
-  if (!process.env.SMTP_HOST || !process.env.MAIL_TO) {
-    console.error('[contact] Faltan SMTP_HOST o MAIL_TO en las variables de entorno');
-    return res.status(500).json({ ok: false });
+  const sender = envEmail(process.env.MAIL_FROM) || envEmail(process.env.SMTP_USER);
+  const recipient = envEmail(process.env.MAIL_TO);
+  if (!process.env.SMTP_HOST || !sender || !recipient) {
+    console.error('[contact] Revisa SMTP_HOST, SMTP_USER/MAIL_FROM y MAIL_TO: falta alguna o no es un email válido');
+    return res.status(500).json({ ok: false, error: 'config' });
   }
 
   const need = NEEDS[body.need] ?? NEEDS.other;
@@ -81,8 +94,8 @@ export default async function handler(req, res) {
 
   try {
     await getTransporter().sendMail({
-      from: { name: `Web ${BRAND_NAME}`, address: process.env.MAIL_FROM || process.env.SMTP_USER },
-      to: process.env.MAIL_TO,
+      from: { name: `Web ${BRAND_NAME}`, address: sender },
+      to: recipient,
       // al darle a "Responder" le escribes directamente al cliente
       replyTo: { name, address: email },
       subject: `${BRAND_NAME} · ${name} · ${need}`,
@@ -91,7 +104,8 @@ export default async function handler(req, res) {
     });
     return res.status(200).json({ ok: true });
   } catch (error) {
-    console.error('[contact] No se pudo enviar el email:', error.message);
-    return res.status(502).json({ ok: false });
+    console.error('[contact] No se pudo enviar el email:', error.code, error.responseCode, error.message);
+    // solo el código (EAUTH, ECONNECTION, EENVELOPE…): sirve para diagnosticar sin exponer nada sensible
+    return res.status(502).json({ ok: false, error: 'smtp', code: error.code, responseCode: error.responseCode });
   }
 }
