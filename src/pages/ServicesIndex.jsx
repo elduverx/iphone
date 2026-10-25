@@ -5,10 +5,11 @@ import { animateBatch } from '../utils/animations';
 import Seo, { breadcrumbLd } from '../components/Seo';
 import PageHeader from '../components/PageHeader';
 import SmartLink from '../components/SmartLink';
+import PriceTag from '../components/PriceTag';
 import { ArrowRightIcon, PlatformIcon } from '../components/Icons';
 
 const ServicesIndex = () => {
-  const { t, tr } = useLanguage();
+  const { t, tr, lang } = useLanguage();
   const crumbs = [{ name: t('pages.home'), path: '/' }, { name: t('pages.services'), path: '/servicios' }];
 
   useGSAP(() => {
@@ -17,7 +18,7 @@ const ServicesIndex = () => {
 
   return (
     <>
-      <Seo title={t('pages.servicesTitle')} description={t('pages.servicesDescription')} path="/servicios" jsonLd={[breadcrumbLd(crumbs)]} />
+      <Seo title={t('pages.servicesTitle')} description={t('pages.servicesDescription')} path="/servicios" jsonLd={[breadcrumbLd(crumbs, lang)]} />
       <PageHeader crumbs={crumbs} eyebrow={t('pages.services')} title={t('pages.servicesH1')} subtitle={t('pages.servicesSubtitle')} />
 
       <section className="sm:px-10 px-5 pb-24">
@@ -34,7 +35,8 @@ const ServicesIndex = () => {
                 <p className="text-sm text-forge-light font-semibold">{copy.eyebrow}</p>
                 <h2 className="text-2xl font-semibold mt-2 mb-3">{copy.h1}</h2>
                 <p className="text-gray leading-relaxed mb-6">{copy.metaDescription}</p>
-                <span className="mt-auto text-link flex items-center text-sm font-semibold">
+                <PriceTag price={page.price} className="mt-auto mb-4 text-gray-200" />
+                <span className="text-link flex items-center text-sm font-semibold">
                   {t('pages.viewService')}
                   <ArrowRightIcon className="ml-1 transition-transform group-hover:translate-x-1" />
                 </span>

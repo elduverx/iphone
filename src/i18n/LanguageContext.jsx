@@ -1,43 +1,31 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import es from './es';
 import en from './en';
+import { isEnglishPath, localizePath, toSpanishPath } from './paths';
 
 const dictionaries = { es, en };
-const STORAGE_KEY = 'swiftforge-lang';
 
 const LanguageContext = createContext(null);
 
-// El HTML pre-renderizado sale en español; en el navegador se aplica la preferencia guardada o la del sistema
-const getPreferredLang = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && dictionaries[saved]) return saved;
-  } catch {
-    // localStorage no disponible (modo privado, etc.)
-  }
-  return navigator.language?.toLowerCase().startsWith('es') ? 'es' : 'en';
-};
-
+// El idioma lo marca la URL: /en/... en inglés y el resto en español. Así cada idioma
+// se pre-renderiza en su propio HTML, Google indexa los dos y los anuncios aterrizan sin parpadeos.
 export const LanguageProvider = ({ children }) => {
-  const [lang, setLangState] = useState('es');
-
-  // tras hidratar, cambia al idioma preferido (así el primer render coincide con el HTML estático)
-  useEffect(() => {
-    setLangState(getPreferredLang());
-  }, []);
+  const { pathname, hash } = useLocation();
+  const navigate = useNavigate();
+  const lang = isEnglishPath(pathname) ? 'en' : 'es';
 
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
 
-  const setLang = useCallback((next) => {
-    setLangState(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // sin persistencia, no pasa nada
-    }
-  }, []);
+  // cambiar de idioma = ir a la misma página en el otro idioma
+  const setLang = useCallback(
+    (next) => {
+      if (next !== lang) navigate(localizePath(toSpanishPath(pathname), next) + hash);
+    },
+    [lang, pathname, hash, navigate]
+  );
 
   // t('hero.title') → texto de la interfaz en el idioma actual
   const t = useCallback(

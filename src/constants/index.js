@@ -1,55 +1,61 @@
 // Contenido de la web. Todo texto visible va como { es, en }.
 // Los valores marcados con TODO son placeholders: reemplázalos por los reales.
 
-import { SITE_URL } from "./site";
+import { BRAND_NAME, SITE_URL } from "./site";
+import { getServicePage } from "../content/services";
+import { formatPrice } from "../utils";
+
+const appPrice = getServicePage("desarrollo-apps-ios").price;
 
 export const brand = {
-  name: "Swiftforge",
+  name: BRAND_NAME,
   url: SITE_URL,
 };
 
 export const contact = {
   whatsapp: "34673685542", // TODO: confirmar número (formato internacional sin + ni espacios)
   phoneLabel: "+34 673 685 542",
-  email: "hola@swiftforge.es", // TODO: email real en el dominio definitivo
-  formspreeId: import.meta.env.VITE_FORMSPREE_ID,
+  email: "info@ioscraft.app", // TODO: crear este buzón (p. ej. con Google Workspace o el reenvío de correo del registrador)
+};
+
+// Medición de campañas. Sin IDs no se carga nada ni se muestra el aviso de cookies.
+export const tracking = {
+  gaId: import.meta.env.VITE_GA_ID, // G-XXXXXXX (Google Analytics 4)
+  adsId: import.meta.env.VITE_GOOGLE_ADS_ID, // AW-XXXXXXX
+  adsLeadLabel: import.meta.env.VITE_GOOGLE_ADS_LEAD_LABEL, // etiqueta de la conversión "formulario enviado"
+  adsContactLabel: import.meta.env.VITE_GOOGLE_ADS_CONTACT_LABEL, // opcional: clic en WhatsApp, email o teléfono
+  metaPixelId: import.meta.env.VITE_META_PIXEL_ID,
 };
 
 // Navegación: `to` con "/#" va a una sección de la home; el resto son páginas
 export const navLists = [
-  { id: "apps", to: "/#apps", label: { es: "Apps", en: "Apps" } },
-  { id: "ecosistema", to: "/#ecosistema", label: { es: "Ecosistema", en: "Ecosystem" } },
   { id: "servicios", to: "/servicios", label: { es: "Servicios", en: "Services" } },
+  { id: "apps", to: "/#apps", label: { es: "Apps", en: "Apps" } },
   { id: "casos", to: "/casos", label: { es: "Casos", en: "Case studies" } },
+  { id: "proceso", to: "/#proceso", label: { es: "Proceso", en: "Process" } },
   { id: "estudio", to: "/#estudio", label: { es: "Estudio", en: "Studio" } },
 ];
 
-// Proyectos reales. Con `video` aparecen en el carrusel; con `screen` (1290×2796) en el iPhone 3D.
+// Proyectos con vídeo para el carrusel de la home
 export const apps = [
   {
     id: "tipson-audit",
     caseSlug: "tipson-audit",
     name: "Tipson Audit",
     tagline: { es: ["Tipson Audit.", "IA que revisa tus contratos", "antes de firmar."], en: ["Tipson Audit.", "AI that reviews your contracts", "before you sign."] },
-    description: { es: "Auditoría de contratos con IA, VisionKit y PDFKit", en: "AI contract review with VisionKit and PDFKit" },
     platforms: ["iPhone", "iPad"],
     appStoreUrl: "",
-    icon: "/assets/apps/tipson-audit/icon.png",
-    screen: "/assets/apps/tipson-audit/screen.jpg",
     video: "/assets/apps/tipson-audit/preview.mp4",
     poster: "/assets/apps/tipson-audit/poster.jpg",
     videoDuration: 9,
-    phoneColor: ["#C9C8C2", "#ffffff", "#C9C8C2"],
   },
   {
     id: "duvifit",
     caseSlug: "duvifit",
     name: "DuviFit",
     tagline: { es: ["DuviFit.", "Tu gimnasio en el bolsillo", "y en tu Apple Watch."], en: ["DuviFit.", "Your gym in your pocket", "and on your Apple Watch."] },
-    description: { es: "Entrenos con HealthKit, Live Activities y watchOS", en: "Workouts with HealthKit, Live Activities and watchOS" },
     platforms: ["iPhone", "iPad", "Apple Watch"],
     appStoreUrl: "https://apps.apple.com/es/app/duvifit/id6761272248",
-    icon: "/assets/apps/store/duvifit.jpg",
     video: "/assets/apps/duvifit/preview.mp4",
     poster: "/assets/apps/duvifit/poster.jpg",
     videoDuration: 6,
@@ -59,24 +65,19 @@ export const apps = [
     caseSlug: "horda-neon",
     name: "Horda Neón",
     tagline: { es: ["Horda Neón.", "Un juego en SpriteKit para", "iPhone, iPad, Mac, TV y Watch."], en: ["Horda Neón.", "A SpriteKit game for", "iPhone, iPad, Mac, TV and Watch."] },
-    description: { es: "Roguelite en SpriteKit para cinco plataformas", en: "SpriteKit roguelite for five platforms" },
     platforms: ["iPhone", "iPad", "Mac", "Apple TV", "Apple Watch"],
     appStoreUrl: "",
-    icon: "/assets/apps/horda/icon.png",
-    screen: "/assets/apps/horda/screen.jpg",
     video: "/assets/apps/horda/preview.mp4",
     poster: "/assets/apps/horda/poster.jpg",
     videoDuration: 10,
-    phoneColor: ["#454749", "#3b3b3b", "#181819"],
   },
   {
     id: "tipson-scan",
     name: "Tipson Scan",
+    client: true,
     tagline: { es: ["Tipson Scan.", "Tickets y facturas", "escaneados con IA."], en: ["Tipson Scan.", "Receipts and invoices", "scanned with AI."] },
-    description: { es: "Gastos y facturas con VisionKit e IA", en: "Expenses and invoices with VisionKit and AI" },
     platforms: ["iPhone", "iPad"],
     appStoreUrl: "https://apps.apple.com/es/app/tipson-scan-gastos-y-facturas/id6804655297",
-    icon: "/assets/apps/store/tipson.jpg",
     video: "/assets/apps/tipson-scan/preview.mp4",
     poster: "/assets/apps/tipson-scan/poster.jpg",
     videoDuration: 6,
@@ -85,45 +86,31 @@ export const apps = [
     id: "hazte-viral",
     name: "Hazte Viral",
     tagline: { es: ["Hazte Viral.", "La IA analiza tus vídeos", "y te escribe los guiones."], en: ["Hazte Viral.", "AI analyzes your videos", "and writes your scripts."] },
-    description: { es: "Análisis de vídeo con IA y AVFoundation", en: "AI video analysis with AVFoundation" },
     platforms: ["iPhone", "iPad"],
     appStoreUrl: "https://apps.apple.com/es/app/hazte-viral/id6757550253",
-    icon: "/assets/apps/store/hazte-viral.jpg",
-    screen: "/assets/apps/hazte-viral/screen.jpg",
     video: "/assets/apps/hazte-viral/preview.mp4",
     poster: "/assets/apps/hazte-viral/poster.jpg",
     videoDuration: 6,
-    phoneColor: ["#53596E", "#6395ff", "#21242e"],
-  },
-  {
-    id: "ordenate",
-    name: "Ordénate",
-    description: { es: "Tu día por categorías y listas", en: "Your day by categories and lists" },
-    platforms: ["iPhone", "iPad"],
-    appStoreUrl: "https://apps.apple.com/es/app/ordenate/id6759111790",
-    icon: "/assets/apps/store/ordenate.jpg",
-    screen: "/assets/apps/ordenate/screen.jpg",
-    phoneColor: ["#C9C8C2", "#ffffff", "#C9C8C2"],
-  },
-  {
-    id: "teleprompter",
-    name: "TelePrompter Duvi",
-    description: { es: "Graba mientras lees tu guion", en: "Record while reading your script" },
-    platforms: ["iPhone", "iPad"],
-    appStoreUrl: "https://apps.apple.com/es/app/teleprompter-duvi/id6759974451",
-    icon: "/assets/apps/store/teleprompter.jpg",
-    screen: "/assets/apps/teleprompter/screen.jpg",
-    phoneColor: ["#8F8A81", "#ffe7b9", "#6f6c64"],
   },
 ];
 
-export const carouselApps = apps.filter((app) => app.video);
-export const modelApps = apps.filter((app) => app.screen);
-
 export const APP_STORE_DEVELOPER_URL = "https://apps.apple.com/es/developer/duverney-muriel/id1861505676";
 
-// Apps publicadas en la App Store (datos de la ficha oficial)
+// Apps publicadas en la App Store (datos de la ficha oficial). `client`: hecha para un cliente
 export const publishedApps = [
+  {
+    id: "tipson",
+    name: "Tipson Scan",
+    client: true, // desarrollada para un cliente: es el ejemplo real del hero
+    url: "https://apps.apple.com/es/app/tipson-scan-gastos-y-facturas/id6804655297",
+    icon: "/assets/apps/store/tipson.jpg",
+    category: { es: "Finanzas", en: "Finance" },
+    tagline: { es: "Escáner de tickets y facturas con IA para autónomos.", en: "AI receipt and invoice scanner for freelancers." },
+    platforms: ["iPhone", "iPad"],
+    video: "/assets/apps/tipson-scan/preview.mp4",
+    featured: { image: "/assets/apps/tipson-scan/poster.jpg", position: "85% 50%" },
+    price: { es: "Gratis", en: "Free" },
+  },
   {
     id: "duvifit",
     name: "DuviFit",
@@ -132,21 +119,8 @@ export const publishedApps = [
     category: { es: "Salud y forma física", en: "Health & Fitness" },
     tagline: { es: "Rutinas y progreso en el gimnasio, también en Apple Watch.", en: "Gym routines and progress, also on Apple Watch." },
     platforms: ["iPhone", "iPad", "Apple Watch"],
-    tech: ["HealthKit", "watchOS", "Live Activities", "Swift Charts"],
     caseSlug: "duvifit",
-    featured: { image: "/assets/apps/duvifit/poster.jpg" },
     rating: 5,
-    price: { es: "Gratis", en: "Free" },
-  },
-  {
-    id: "tipson",
-    name: "Tipson Scan",
-    url: "https://apps.apple.com/es/app/tipson-scan-gastos-y-facturas/id6804655297",
-    icon: "/assets/apps/store/tipson.jpg",
-    category: { es: "Finanzas", en: "Finance" },
-    tagline: { es: "Escáner de tickets y facturas con IA para autónomos.", en: "AI receipt and invoice scanner for freelancers." },
-    platforms: ["iPhone", "iPad"],
-    tech: ["VisionKit", "IA", "SwiftData", "App Intents"],
     price: { es: "Gratis", en: "Free" },
   },
   {
@@ -157,7 +131,6 @@ export const publishedApps = [
     category: { es: "Negocios", en: "Business" },
     tagline: { es: "Controla cobros pendientes, gastos y ahorro.", en: "Track pending payments, expenses and savings." },
     platforms: ["iPhone", "iPad"],
-    tech: ["SwiftData", "CloudKit", "WidgetKit", "Face ID"],
     rating: 5,
     price: { es: "Gratis", en: "Free" },
   },
@@ -169,7 +142,6 @@ export const publishedApps = [
     category: { es: "Juegos", en: "Games" },
     tagline: { es: "Tres en raya en el espacio, para Apple Vision Pro.", en: "Spatial tic-tac-toe for Apple Vision Pro." },
     platforms: ["Vision Pro"],
-    tech: ["visionOS", "SwiftUI"],
     servicePage: "desarrollo-vision-pro",
     featured: { vision: true },
     price: { es: "1,99 €", en: "€1.99" },
@@ -182,7 +154,6 @@ export const publishedApps = [
     category: { es: "Foto y vídeo", en: "Photo & Video" },
     tagline: { es: "La IA analiza tus vídeos y te da métricas, consejos y guiones UGC.", en: "AI analyzes your videos and gives metrics, tips and UGC scripts." },
     platforms: ["iPhone", "iPad"],
-    tech: ["AVFoundation", "IA", "StoreKit 2"],
     price: { es: "Gratis", en: "Free" },
   },
   {
@@ -193,7 +164,6 @@ export const publishedApps = [
     category: { es: "Estilo de vida", en: "Lifestyle" },
     tagline: { es: "Organiza tu día por categorías y listas.", en: "Organize your day with categories and lists." },
     platforms: ["iPhone", "iPad"],
-    tech: ["SwiftUI", "SwiftData"],
     rating: 5,
     price: { es: "Gratis", en: "Free" },
   },
@@ -205,300 +175,152 @@ export const publishedApps = [
     category: { es: "Foto y vídeo", en: "Photo & Video" },
     tagline: { es: "Graba mientras lees el guion en pantalla.", en: "Record while reading your script on screen." },
     platforms: ["iPhone", "iPad"],
-    tech: ["AVFoundation", "Photos"],
     price: { es: "2,99 €", en: "€2.99" },
   },
 ];
 
-export const sizes = [
-  { label: '6.1"', value: "small" },
-  { label: '6.7"', value: "large" },
-];
+// Precios "desde" públicos por idioma: euros en español (España) y dólares en inglés (USA/UK).
+// Pon false en un idioma para ocultarlos en ese mercado (queda "presupuesto tras la llamada").
+export const showPrices = { es: true, en: true };
 
-// Ecosistema: cada plataforma se enseña en su dispositivo con un proyecto real
-// (componentes en components/devices). `project` dice de dónde sale lo que se ve.
-export const platforms = [
-  {
-    id: "iphone",
-    name: "iPhone",
-    os: "iOS",
-    duration: 15,
-    project: {
-      name: "Tipson Audit",
-      story: {
-        es: "Grabación real: escaneas un contrato, la IA lo analiza, marca las cláusulas de riesgo y te responde dudas en un chat.",
-        en: "Real recording: you scan a contract, the AI analyzes it, flags risky clauses and answers your questions in a chat.",
-      },
-    },
-    description: {
-      es: "Apps nativas en SwiftUI y UIKit, widgets, Live Activities, Dynamic Island, App Clips y Apple Pay.",
-      en: "Native SwiftUI and UIKit apps, widgets, Live Activities, Dynamic Island, App Clips and Apple Pay.",
-    },
-    features: ["SwiftUI", "WidgetKit", "Live Activities", "App Intents", "VisionKit", "StoreKit 2"],
-  },
-  {
-    id: "watch",
-    name: "Apple Watch",
-    os: "watchOS",
-    duration: 10,
-    project: {
-      name: "Horda Neón",
-      story: {
-        es: "Capturas reales: el juego completo en la muñeca, adaptado a partidas cortas y a una pantalla pequeña.",
-        en: "Real captures: the full game on your wrist, adapted to short sessions and a small screen.",
-      },
-    },
-    description: {
-      es: "Complicaciones, entrenos con HealthKit, notificaciones accionables y apps independientes del iPhone, como DuviFit.",
-      en: "Complications, HealthKit workouts, actionable notifications and standalone apps, like DuviFit.",
-    },
-    features: ["HealthKit", "WorkoutKit", "Complications", "Smart Stack", "WatchConnectivity"],
-  },
-  {
-    id: "vision",
-    name: "Vision Pro",
-    os: "visionOS",
-    duration: 7,
-    project: {
-      name: "DuviTricky",
-      story: {
-        es: "Publicada en la App Store para Vision Pro: tres en raya en ventanas de cristal que flotan en tu salón. Se juega mirando y pellizcando.",
-        en: "Live on the App Store for Vision Pro: tic-tac-toe in glass windows floating in your living room. You play by looking and pinching.",
-      },
-    },
-    description: {
-      es: "Computación espacial: ventanas, volúmenes y espacios inmersivos con RealityKit. Y streaming con CloudXR.",
-      en: "Spatial computing: windows, volumes and immersive spaces with RealityKit. Plus CloudXR streaming.",
-    },
-    features: ["RealityKit", "ARKit", "Immersive Spaces", "Volumes", "CloudXR"],
-  },
-  {
-    id: "mac",
-    name: "Mac",
-    os: "macOS",
-    duration: 11,
-    project: {
-      name: "Horda Neón",
-      story: {
-        es: "Capturas reales: el mismo juego a pantalla completa en Mac, con teclado, ratón o mando.",
-        en: "Real captures: the same game full screen on Mac, with keyboard, mouse or controller.",
-      },
-    },
-    description: {
-      es: "Apps de escritorio en SwiftUI o Mac Catalyst, con teclado, ratón y mando, y distribución dentro o fuera de la App Store.",
-      en: "Desktop apps with SwiftUI or Mac Catalyst, with keyboard, mouse and controller, in or outside the App Store.",
-    },
-    features: ["SwiftUI", "AppKit", "Mac Catalyst", "GameController", "Notarization"],
-  },
-  {
-    id: "ipad",
-    name: "iPad",
-    os: "iPadOS",
-    duration: 15,
-    project: {
-      name: "Tipson Audit",
-      story: {
-        es: "Grabación real: el mismo análisis de contratos que en iPhone, aprovechando la pantalla grande del iPad.",
-        en: "Real recording: the same contract analysis as on iPhone, making the most of the iPad's large screen.",
-      },
-    },
-    description: {
-      es: "Layouts adaptativos, multiventana, Apple Pencil y Stage Manager para productividad, educación y juegos.",
-      en: "Adaptive layouts, multiwindow, Apple Pencil and Stage Manager for productivity, education and games.",
-    },
-    features: ["Split View", "Stage Manager", "Apple Pencil", "Drag & Drop"],
-  },
-  {
-    id: "tv",
-    name: "Apple TV",
-    os: "tvOS",
-    duration: 8,
-    project: {
-      name: "Horda Neón",
-      story: {
-        es: "La imagen Top Shelf real en la pantalla de inicio de tvOS y, al abrirlo, el juego en la tele con el Siri Remote o un mando.",
-        en: "The real Top Shelf image on the tvOS home screen and, once opened, the game on your TV with the Siri Remote or a controller.",
-      },
-    },
-    description: {
-      es: "Apps de contenido y juegos para el salón: Top Shelf, motor de foco, Siri Remote y mandos.",
-      en: "Content apps and games for the living room: Top Shelf, focus engine, Siri Remote and controllers.",
-    },
-    features: ["Top Shelf", "Focus engine", "AVKit", "GameController"],
-  },
-  {
-    id: "carplay",
-    name: "CarPlay",
-    os: "CarPlay",
-    duration: 7,
-    project: {
-      name: { es: "Concepto", en: "Concept" },
-      story: {
-        es: "Ejemplo de app de movilidad: la ruta y el tiempo de llegada del conductor, en directo en la pantalla del coche.",
-        en: "Sample mobility app: the route and the driver's arrival time, live on the car's display.",
-      },
-    },
-    description: {
-      es: "Apps de audio, navegación, aparcamiento, carga de vehículos eléctricos y movilidad en la pantalla del coche.",
-      en: "Audio, navigation, parking, EV charging and mobility apps on the car's display.",
-    },
-    features: ["CarPlay", "MapKit", "CoreLocation"],
-  },
-];
-
-export const techStack = [
-  "Swift 6", "SwiftUI", "UIKit", "Objective-C", "SwiftData", "Core Data", "CloudKit",
-  "Combine", "async/await", "StoreKit 2", "Apple Pay", "WidgetKit", "ActivityKit",
-  "App Intents", "Foundation Models", "Core ML", "Vision", "HealthKit", "MapKit",
-  "RealityKit", "ARKit", "AVFoundation", "Core Bluetooth", "HomeKit / Matter",
-  "Push Notifications", "Sign in with Apple", "Firebase", "Supabase", "REST / GraphQL",
-  "Swift Testing", "XCTest", "Xcode Cloud", "Fastlane", "TestFlight",
-];
-
-// Servicios: lo que un cliente o una agencia puede contratar
+// Servicios de la home. Cada uno lleva a su página (/servicios/<page>), que sirve de landing para su campaña;
+// el precio sale de esa página. `featured` ocupa dos columnas; el orden está pensado para que las filas
+// queden completas a 3 columnas y a 2 (ver Services.jsx).
 export const services = [
   {
     id: "new-app",
     page: "desarrollo-apps-ios",
+    featured: true,
     title: { es: "Apps nuevas y MVP", en: "New apps & MVPs" },
     description: {
-      es: "De la idea a la App Store. Validamos el alcance contigo, diseñamos siguiendo las Human Interface Guidelines y entregamos una app nativa lista para crecer.",
+      es: "De la idea a la App Store. Cerramos el alcance contigo, diseñamos siguiendo las Human Interface Guidelines y entregamos una app nativa lista para crecer.",
       en: "From idea to App Store. We scope it with you, design to the Human Interface Guidelines and ship a native app ready to grow.",
     },
-    tags: ["SwiftUI", "MVP", "App Store"],
+  },
+  {
+    id: "saas",
+    page: "apps-saas-suscripcion",
+    title: { es: "Apps SaaS y de suscripción", en: "SaaS & subscription apps" },
+    description: {
+      es: "Herramientas para autónomos y empresas que se pagan cada mes: gastos, cobros, contratos. App, backend, IA y suscripciones.",
+      en: "Tools for freelancers and businesses that pay monthly: expenses, collections, contracts. App, backend, AI and subscriptions.",
+    },
   },
   {
     id: "rescue",
     page: "rescate-apps-ios",
-    title: { es: "Rescate de apps y arreglo de código", en: "App rescue & code fixes" },
+    title: { es: "Rescate de apps", en: "App rescue" },
     description: {
-      es: "¿El anterior desarrollador desapareció o la app se cae? Auditamos el código, arreglamos crashes y bugs y la dejamos estable y mantenible.",
-      en: "Previous developer gone or the app keeps crashing? We audit the code, fix crashes and bugs, and leave it stable and maintainable.",
+      es: "¿El anterior desarrollador desapareció o la app se cae? Auditamos el código, arreglamos crashes y bugs y la dejamos estable.",
+      en: "Previous developer gone or the app keeps crashing? We audit the code, fix crashes and bugs, and make it stable.",
     },
-    tags: ["Crashes", "Bugs", "Refactor"],
   },
   {
     id: "rejection",
     page: "rechazo-app-store",
     title: { es: "Rechazos de App Store", en: "App Store rejections" },
     description: {
-      es: "Resolvemos rechazos de App Review: privacy manifests, permisos, compras in-app, Sign in with Apple y metadatos. Reenviamos hasta que se aprueba.",
-      en: "We fix App Review rejections: privacy manifests, permissions, in-app purchases, Sign in with Apple and metadata, and resubmit until approved.",
+      es: "Resolvemos rechazos de App Review: privacidad, permisos, compras in-app y metadatos. Reenviamos hasta resolverlo.",
+      en: "We fix App Review rejections: privacy, permissions, in-app purchases and metadata, and resubmit until it's resolved.",
     },
-    tags: ["App Review", "Privacy", "Guidelines"],
   },
   {
-    id: "modernize",
-    title: { es: "Modernización", en: "Modernization" },
+    id: "qa",
+    page: "testing-qa-apps-ios",
+    title: { es: "QA y testing", en: "QA & testing" },
     description: {
-      es: "Migración de Objective-C a Swift y de UIKit a SwiftUI, Swift 6 y concurrencia, adaptación a Liquid Glass y a cada nueva versión de iOS.",
-      en: "Objective-C to Swift and UIKit to SwiftUI migrations, Swift 6 concurrency, Liquid Glass adoption and every new iOS release.",
+      es: "Probamos tu app en iPhone y iPad reales antes de cada versión y automatizamos las pruebas críticas. Bugs priorizados, con pasos para reproducirlos.",
+      en: "We test your app on real iPhones and iPads before every release and automate the critical tests. Prioritized bugs, with steps to reproduce.",
     },
-    tags: ["Obj-C → Swift", "UIKit → SwiftUI", "Swift 6"],
   },
   {
-    id: "integrations",
-    title: { es: "Integraciones", en: "Integrations" },
-    description: {
-      es: "Conectamos tu app con tu backend y tus herramientas: APIs REST/GraphQL, Firebase, Supabase, pagos, CRM/ERP, push, analítica, Bluetooth e IoT.",
-      en: "We connect your app to your backend and tools: REST/GraphQL APIs, Firebase, Supabase, payments, CRM/ERP, push, analytics, Bluetooth and IoT.",
-    },
-    tags: ["APIs", "Pagos", "BLE / IoT"],
-  },
-  {
-    id: "payments",
-    title: { es: "Suscripciones y pagos", en: "Subscriptions & payments" },
-    description: {
-      es: "Compras in-app y suscripciones con StoreKit 2, paywalls, Apple Pay, Stripe y RevenueCat. Monetiza sin pelearte con las reglas de Apple.",
-      en: "In-app purchases and subscriptions with StoreKit 2, paywalls, Apple Pay, Stripe and RevenueCat. Monetize without fighting Apple's rules.",
-    },
-    tags: ["StoreKit 2", "Apple Pay", "Paywalls"],
-  },
-  {
-    id: "system",
-    title: { es: "Widgets, Siri y Apple Intelligence", en: "Widgets, Siri & Apple Intelligence" },
-    description: {
-      es: "Lleva tu app más allá de su icono: widgets, Live Activities, Dynamic Island, Controles, App Intents, Atajos, App Clips e IA on-device.",
-      en: "Take your app beyond its icon: widgets, Live Activities, Dynamic Island, Controls, App Intents, Shortcuts, App Clips and on-device AI.",
-    },
-    tags: ["WidgetKit", "App Intents", "Foundation Models"],
-  },
-  {
-    id: "spatial",
+    id: "vision",
     page: "desarrollo-vision-pro",
-    title: { es: "Vision Pro, Watch y TV", en: "Vision Pro, Watch & TV" },
+    featured: true,
+    title: { es: "Apple Vision Pro", en: "Apple Vision Pro" },
     description: {
-      es: "Llevamos tu app de iPhone a visionOS, watchOS y tvOS, o creamos experiencias diseñadas específicamente para cada dispositivo.",
-      en: "We extend your iPhone app to visionOS, watchOS and tvOS, or build experiences designed specifically for each device.",
+      es: "Computación espacial con todo: ventanas, volúmenes y espacios inmersivos, modelos 3D con RealityKit y control con la mirada y las manos. Ya tenemos una app publicada para Vision Pro.",
+      en: "Spatial computing, all in: windows, volumes and immersive spaces, RealityKit 3D models and eye and hand control. We already have an app live for Vision Pro.",
     },
-    tags: ["visionOS", "watchOS", "tvOS"],
   },
   {
-    id: "native",
-    title: { es: "De híbrido a nativo", en: "Hybrid to native" },
+    id: "accessibility",
+    page: "accesibilidad-apps-ios",
+    title: { es: "Accesibilidad (Ley Europea)", en: "Accessibility (EAA)" },
     description: {
-      es: "¿Tu app en React Native o Flutter se queda corta en rendimiento o en funciones de Apple? La pasamos a Swift nativo, por partes o completa.",
-      en: "Is your React Native or Flutter app falling short on performance or Apple features? We move it to native Swift, piece by piece or all at once.",
+      es: "Obligatoria desde junio de 2025 para comercio electrónico, banca, transporte y más. Auditamos tu app según EN 301 549 y la corregimos.",
+      en: "Mandatory since June 2025 for e-commerce, banking, transport and more. We audit your app against EN 301 549 and fix it.",
     },
-    tags: ["React Native", "Flutter", "Swift"],
+  },
+  {
+    id: "update",
+    page: "actualizar-app-ios",
+    title: { es: "Actualización a iOS 26", en: "iOS 26 update" },
+    description: {
+      es: "Apple solo acepta actualizaciones compiladas con Xcode 26. Ponemos tu app al día con el último SDK sin romper lo que funciona.",
+      en: "Apple only accepts updates built with Xcode 26. We bring your app up to the latest SDK without breaking what works.",
+    },
   },
   {
     id: "maintenance",
     page: "mantenimiento-apps-ios",
-    title: { es: "Mantenimiento y soporte", en: "Maintenance & support" },
+    title: { es: "Mantenimiento mensual", en: "Monthly maintenance" },
     description: {
-      es: "Planes mensuales: compatibilidad con cada iOS, monitorización de crashes, actualizaciones de dependencias, mejoras y publicación.",
-      en: "Monthly plans: compatibility with every iOS release, crash monitoring, dependency updates, improvements and releases.",
-    },
-    tags: ["Retainer", "Crashlytics", "Updates"],
-  },
-  {
-    id: "audit",
-    title: { es: "Auditoría y consultoría", en: "Audits & consulting" },
-    description: {
-      es: "Revisión de arquitectura, rendimiento, seguridad y accesibilidad, con un informe claro y priorizado de qué arreglar primero.",
-      en: "Architecture, performance, security and accessibility review, with a clear, prioritized report of what to fix first.",
-    },
-    tags: ["Code review", "Performance", "A11y"],
-  },
-  {
-    id: "release",
-    title: { es: "Publicación y CI/CD", en: "Release & CI/CD" },
-    description: {
-      es: "App Store Connect, TestFlight, certificados, Xcode Cloud o Fastlane y fichas optimizadas (ASO) para publicar sin sustos.",
-      en: "App Store Connect, TestFlight, certificates, Xcode Cloud or Fastlane, and optimized listings (ASO) for stress-free releases.",
-    },
-    tags: ["TestFlight", "Xcode Cloud", "ASO"],
-  },
-];
-
-// Para quién trabajamos
-export const audiences = [
-  {
-    id: "startups",
-    title: { es: "Startups y emprendedores", en: "Startups & founders" },
-    description: {
-      es: "Lanza tu MVP en semanas, con código propio que podrás escalar o pasar a un equipo interno.",
-      en: "Launch your MVP in weeks, with code you own and can scale or hand over to an in-house team.",
+      es: "Tu app al día con cada versión de iOS: crashes vigilados, dependencias actualizadas, mejoras y publicaciones.",
+      en: "Your app up to date with every iOS release: crash monitoring, dependency updates, improvements and releases.",
     },
   },
   {
-    id: "companies",
-    title: { es: "Empresas y pymes", en: "Companies & SMBs" },
+    id: "watch",
+    page: "desarrollo-apple-watch",
+    title: { es: "Apple Watch y Apple TV", en: "Apple Watch & Apple TV" },
     description: {
-      es: "Apps para clientes o herramientas internas, integradas con tus sistemas, con mantenimiento a largo plazo.",
-      en: "Customer apps or internal tools, integrated with your systems, with long-term maintenance.",
+      es: "Tu app en la muñeca y en el salón: entrenos con HealthKit, complicaciones, y apps y juegos para la tele.",
+      en: "Your app on the wrist and in the living room: HealthKit workouts, complications, and TV apps and games.",
+    },
+  },
+  {
+    id: "digital",
+    page: "digitalizacion-empresas",
+    featured: true,
+    title: { es: "Digitalización de empresas", en: "Business digitalization" },
+    description: {
+      es: "Transporte, construcción, distribución: cambiamos el papel y el Excel por una app para tu equipo en la calle y un panel web para la oficina.",
+      en: "Transport, construction, distribution: we replace paper and spreadsheets with an app for your field team and a web dashboard for the office.",
+    },
+  },
+  {
+    id: "hourly",
+    page: "desarrollador-ios-por-horas",
+    title: { es: "Desarrollador iOS por horas", en: "Hourly iOS developer" },
+    description: {
+      es: "Un desarrollador iOS que se suma a tu equipo por horas o por sprint, con tus herramientas y tu forma de trabajar.",
+      en: "An iOS developer who joins your team hourly or per sprint, with your tools and your way of working.",
     },
   },
   {
     id: "agencies",
     page: "marca-blanca-agencias",
-    title: { es: "Agencias", en: "Agencies" },
+    title: { es: "Marca blanca para agencias", en: "White-label for agencies" },
     description: {
-      es: "Tu equipo iOS en marca blanca: nos integramos con vosotros, bajo NDA, para los proyectos Apple de vuestros clientes.",
-      en: "Your white-label iOS team: we join you under NDA for your clients' Apple projects.",
+      es: "Tu equipo iOS cuando lo necesitas: nos integramos con vosotros, bajo NDA, para los proyectos Apple de vuestros clientes.",
+      en: "Your iOS team when you need it: we join you under NDA for your clients' Apple projects.",
     },
   },
+];
+
+// Otras cosas que también hacemos (se listan sin página propia)
+export const capabilities = [
+  { es: "Migración de Objective-C a Swift", en: "Objective-C to Swift migration" },
+  { es: "De React Native o Flutter a nativo", en: "React Native or Flutter to native" },
+  { es: "Suscripciones y compras in-app", en: "Subscriptions & in-app purchases" },
+  { es: "Backend y panel web con Next.js y PostgreSQL", en: "Next.js & PostgreSQL backends and dashboards" },
+  { es: "Integración con tu backend, CRM o pagos", en: "Backend, CRM & payment integrations" },
+  { es: "Rendimiento y consumo de batería", en: "Performance & battery usage" },
+  { es: "Revisión de seguridad", en: "Security review" },
+  { es: "Widgets, Siri y Apple Intelligence", en: "Widgets, Siri & Apple Intelligence" },
+  { es: "Auditoría de código", en: "Code audits" },
+  { es: "TestFlight, publicación y ASO", en: "TestFlight, release & ASO" },
 ];
 
 export const processSteps = [
@@ -528,25 +350,26 @@ export const processSteps = [
   },
 ];
 
-export const stats = [
-  { value: "1", label: { es: "interlocutor de principio a fin", en: "point of contact, start to finish" } },
-  { value: "100%", label: { es: "nativo en Swift", en: "native Swift" } },
-  { value: "24 h", label: { es: "para responderte", en: "to get back to you" } },
-];
-
 export const faqs = [
-  {
-    q: { es: "¿Solo trabajáis con Apple?", en: "Do you only work with Apple platforms?" },
-    a: {
-      es: "Sí. Nos especializamos en el ecosistema Apple con Swift nativo. Por eso aprovechamos cada novedad de iOS el mismo día que sale.",
-      en: "Yes. We specialize in the Apple ecosystem with native Swift, which lets us adopt every new iOS feature on day one.",
-    },
-  },
   {
     q: { es: "¿Cuánto cuesta una app?", en: "How much does an app cost?" },
     a: {
-      es: "Depende del alcance, las integraciones y las plataformas. Tras una primera llamada gratuita recibes un presupuesto cerrado por fases.",
-      en: "It depends on scope, integrations and platforms. After a free first call you get a fixed, phased quote.",
+      es: `Un MVP para iPhone y iPad parte de ${formatPrice(appPrice, "es")} + IVA. El precio final depende del alcance, las integraciones y las plataformas: tras una primera llamada gratuita recibes un presupuesto cerrado por fases, sin sorpresas.`,
+      en: `An iPhone and iPad MVP starts at ${formatPrice(appPrice, "en")}. The final price depends on scope, integrations and platforms: after a free first call you get a fixed, phased quote with no surprises.`,
+    },
+  },
+  {
+    q: { es: "¿Cuánto se tarda?", en: "How long does it take?" },
+    a: {
+      es: "Un MVP bien acotado suele llevar entre 6 y 12 semanas. En el descubrimiento fijamos un calendario por fases con una entrega cada semana.",
+      en: "A well-scoped MVP usually takes 6 to 12 weeks. During discovery we set a phased schedule with a delivery every week.",
+    },
+  },
+  {
+    q: { es: "¿Hacéis también el backend y la web?", en: "Do you build the backend and web too?" },
+    a: {
+      es: "Sí. Montamos el backend, la base de datos y el panel web con Next.js y PostgreSQL, así tienes app, servidor y web con un solo equipo.",
+      en: "Yes. We build the backend, database and web dashboard with Next.js and PostgreSQL, so you get app, server and web from a single team.",
     },
   },
   {
@@ -564,10 +387,10 @@ export const faqs = [
     },
   },
   {
-    q: { es: "¿Trabajáis con agencias en marca blanca?", en: "Do you work white-label with agencies?" },
+    q: { es: "¿Y Android?", en: "What about Android?" },
     a: {
-      es: "Sí. Firmamos NDA, nos adaptamos a vuestras herramientas y hablamos con vuestro cliente solo si lo pedís.",
-      en: "Yes. We sign NDAs, adapt to your tools and talk to your client only if you want us to.",
+      es: "Nos especializamos en el ecosistema Apple con Swift nativo. Si necesitas Android, nos coordinamos con tu equipo o con otro proveedor usando el mismo backend y el mismo diseño.",
+      en: "We specialize in the Apple ecosystem with native Swift. If you need Android, we coordinate with your team or another provider using the same backend and design.",
     },
   },
   {
@@ -575,6 +398,13 @@ export const faqs = [
     a: {
       es: "Sí, con planes mensuales que cubren cada nueva versión de iOS, crashes, mejoras y publicaciones.",
       en: "Yes, with monthly plans covering every new iOS release, crashes, improvements and releases.",
+    },
+  },
+  {
+    q: { es: "¿Trabajáis con agencias en marca blanca?", en: "Do you work white-label with agencies?" },
+    a: {
+      es: "Sí. Firmamos NDA, nos adaptamos a vuestras herramientas y hablamos con vuestro cliente solo si lo pedís.",
+      en: "Yes. We sign NDAs, adapt to your tools and talk to your client only if you want us to.",
     },
   },
 ];
@@ -595,39 +425,7 @@ export const footerLinks = [
 // Formato: { quote: { es, en }, name: "Nombre", role: { es, en }, company: "Empresa" }
 export const testimonials = [];
 
-// Formas de colaborar (sin precios públicos: presupuesto a medida)
-export const engagements = [
-  {
-    id: "project",
-    title: { es: "Proyecto cerrado", en: "Fixed-scope project" },
-    tagline: { es: "Alcance, plazo y precio fijos.", en: "Fixed scope, timeline and price." },
-    points: {
-      es: ["Descubrimiento y prototipo incluidos", "Demo cada semana en TestFlight", "Publicación en la App Store", "Código y cuentas a tu nombre"],
-      en: ["Discovery and prototype included", "Weekly TestFlight demo", "App Store release", "Code and accounts in your name"],
-    },
-  },
-  {
-    id: "retainer",
-    highlight: true,
-    title: { es: "Mantenimiento mensual", en: "Monthly retainer" },
-    tagline: { es: "Tu app siempre al día, sin sustos.", en: "Your app always up to date, no surprises." },
-    points: {
-      es: ["Compatibilidad con cada versión de iOS", "Monitorización y corrección de crashes", "Horas de mejoras cada mes", "Respuesta prioritaria"],
-      en: ["Compatibility with every iOS release", "Crash monitoring and fixes", "Monthly improvement hours", "Priority response"],
-    },
-  },
-  {
-    id: "agency",
-    title: { es: "Marca blanca para agencias", en: "White-label for agencies" },
-    tagline: { es: "Tu equipo iOS, cuando lo necesitas.", en: "Your iOS team, whenever you need it." },
-    points: {
-      es: ["NDA y discreción total", "Nos adaptamos a vuestras herramientas", "Por horas o por sprint", "Contacto con tu cliente solo si lo pides"],
-      en: ["NDA and full discretion", "We adapt to your tools", "Hourly or per sprint", "Client contact only if you ask"],
-    },
-  },
-];
-
-// Por qué Swiftforge: pilares de la marca
+// Por qué Swiftcraft: pilares de la marca
 export const pillars = [
   {
     title: { es: "Solo Apple", en: "Apple only" },
@@ -643,6 +441,6 @@ export const pillars = [
   },
   {
     title: { es: "Apps en producción", en: "Apps in production" },
-    description: { es: "Publicamos y mantenemos productos propios en la App Store. Sabemos lo que cuesta llegar y quedarse.", en: "We ship and maintain our own products on the App Store. We know what it takes to get there and stay." },
+    description: { es: "Publicamos y mantenemos apps propias y de clientes en la App Store. Sabemos lo que cuesta llegar y quedarse.", en: "We ship and maintain our own and our clients' apps on the App Store. We know what it takes to get there and stay." },
   },
 ];

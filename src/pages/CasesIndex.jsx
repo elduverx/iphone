@@ -8,7 +8,7 @@ import SmartLink from '../components/SmartLink';
 import { ArrowRightIcon } from '../components/Icons';
 
 const CasesIndex = () => {
-  const { t, tr } = useLanguage();
+  const { t, tr, lang } = useLanguage();
   const crumbs = [{ name: t('pages.home'), path: '/' }, { name: t('pages.cases'), path: '/casos' }];
 
   useGSAP(() => {
@@ -17,7 +17,7 @@ const CasesIndex = () => {
 
   return (
     <>
-      <Seo title={t('pages.casesTitle')} description={t('pages.casesDescription')} path="/casos" jsonLd={[breadcrumbLd(crumbs)]} />
+      <Seo title={t('pages.casesTitle')} description={t('pages.casesDescription')} path="/casos" jsonLd={[breadcrumbLd(crumbs, lang)]} />
       <PageHeader crumbs={crumbs} eyebrow={t('pages.cases')} title={t('pages.casesH1')} subtitle={t('pages.casesSubtitle')} />
 
       <section className="sm:px-10 px-5 pb-24">

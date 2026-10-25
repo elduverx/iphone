@@ -1,6 +1,6 @@
 import Lenis from 'lenis'
 import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/all'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import 'lenis/dist/lenis.css'
 gsap.registerPlugin(ScrollTrigger)
 

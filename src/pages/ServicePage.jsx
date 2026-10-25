@@ -2,14 +2,17 @@ import { useParams } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
 import { getServicePage, servicePages } from '../content/services';
 import { getCasePage } from '../content/cases';
-import { brand, publishedApps } from '../constants';
+import { brand, publishedApps, showPrices } from '../constants';
 import { useLanguage } from '../i18n/LanguageContext';
+import { localizePath } from '../i18n/paths';
+import { priceText as formatPriceText } from '../utils';
 import { animateBatch } from '../utils/animations';
 import Seo, { breadcrumbLd, faqLd } from '../components/Seo';
 import PageHeader from '../components/PageHeader';
 import Faq from '../components/Faq';
 import SmartLink from '../components/SmartLink';
-import { ArrowRightIcon, PlatformIcon } from '../components/Icons';
+import PriceTag from '../components/PriceTag';
+import { ArrowRightIcon, CheckIcon, PlatformIcon } from '../components/Icons';
 import { DeviceStage } from '../components/devices/DeviceDemo';
 import NotFound from './NotFound';
 
@@ -19,7 +22,7 @@ const SectionTitle = ({ children }) => (
 
 const ServicePage = () => {
   const { slug } = useParams();
-  const { t, tr } = useLanguage();
+  const { t, tr, lang } = useLanguage();
   const page = getServicePage(slug);
 
   useGSAP(() => {
@@ -36,6 +39,10 @@ const ServicePage = () => {
     { name: copy.eyebrow, path },
   ];
   const proofApps = publishedApps.filter((app) => page.proof.apps.includes(app.id));
+  // "Desde 290 € + IVA." / "From $490." al final de la descripción para Google (solo donde se publican precios)
+  const withPrice = showPrices[lang];
+  const currency = lang === 'en' ? 'USD' : 'EUR';
+  const priceText = withPrice ? ` ${formatPriceText(page.price, lang, page.price.label ? tr(page.price.label) : t('price.from'), t('price.vat'))}.` : '';
   const proofCases = page.proof.cases.map(getCasePage).filter(Boolean);
 
   const serviceLd = {
@@ -46,12 +53,25 @@ const ServicePage = () => {
     serviceType: copy.eyebrow,
     areaServed: 'Worldwide',
     provider: { '@type': 'ProfessionalService', name: brand.name, url: `${brand.url}/` },
-    url: `${brand.url}${path}`,
+    url: `${brand.url}${localizePath(path, lang)}`,
+    ...(withPrice && {
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: currency,
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          minPrice: lang === 'en' ? page.price.usd : page.price.amount,
+          priceCurrency: currency,
+          valueAddedTaxIncluded: false,
+          ...(page.price.per && { unitCode: page.price.per === 'month' ? 'MON' : 'HUR' }),
+        },
+      },
+    }),
   };
 
   return (
     <>
-      <Seo title={copy.metaTitle} description={copy.metaDescription} path={path} jsonLd={[serviceLd, breadcrumbLd(crumbs), faqLd(copy.faqs)]} />
+      <Seo title={copy.metaTitle} description={`${copy.metaDescription}${priceText}`} path={path} jsonLd={[serviceLd, breadcrumbLd(crumbs, lang), faqLd(copy.faqs)]} />
 
       <PageHeader
         crumbs={crumbs}
@@ -60,10 +80,16 @@ const ServicePage = () => {
         subtitle={copy.subtitle}
         icon={<div className="icon-tile"><PlatformIcon id={page.icon} width={30} height={30} strokeWidth={1.3} /></div>}
       >
-        <div className="flex flex-wrap gap-x-4">
+        <PriceTag price={page.price} className="text-xl md:text-2xl text-gray-200 mb-6" />
+        <div className="flex flex-wrap gap-3">
           <a href="#contacto" className="btn !my-0">{t('service.cta')}<ArrowRightIcon /></a>
           {proofCases[0] && <SmartLink to={`/casos/${proofCases[0].slug}`} className="btn-ghost !my-0">{t('pages.viewCase')}: {proofCases[0].name}</SmartLink>}
         </div>
+        <p className="flex flex-wrap gap-x-5 gap-y-2 mt-5 text-sm text-gray-200">
+          {[t('contact.free'), t('contact.reply')].map((item) => (
+            <span key={item} className="flex items-center gap-1.5"><CheckIcon width={16} height={16} />{item}</span>
+          ))}
+        </p>
       </PageHeader>
 
       {/* problemas */}
@@ -166,6 +192,7 @@ const ServicePage = () => {
                     </div>
                     <p className="text-gray-200 mt-4 mb-5 leading-relaxed">{tr(app.tagline)}</p>
                     <div className="flex flex-wrap gap-1.5 mb-5">
+                      {app.client && <span className="chip !bg-white !text-black">{t('store.client')}</span>}
                       {app.platforms.map((platform) => (
                         <span key={platform} className="chip !bg-forge/15 !text-forge-light">{platform}</span>
                       ))}

@@ -1,20 +1,21 @@
 import { useGSAP } from '@gsap/react'
 import { animateBatch, animateWithGsap } from '../utils/animations';
-import { audiences, services } from '../constants';
+import { capabilities, services } from '../constants';
+import { getServicePage } from '../content/services';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ArrowRightIcon } from './Icons';
 import SmartLink from './SmartLink';
+import PriceTag from './PriceTag';
 
-// Tarjetas destacadas del bento (ocupan dos columnas)
-const featured = ['new-app', 'rescue', 'spatial'];
-
+// Cada tarjeta entera lleva a la página del servicio; las `featured` ocupan dos columnas. Con el orden de
+// constants (destacada, 4 normales, destacada, 4 normales, destacada, 2 normales) y la de presupuesto a dos
+// columnas al final, las filas quedan completas: 18 huecos, 6 filas de 3 y 9 de 2.
 const Services = () => {
   const { t, tr } = useLanguage();
 
   useGSAP(() => {
     animateWithGsap('#services_title', { y: 0, opacity: 1 })
-    const cleanups = [animateBatch('.g_service'), animateBatch('.g_audience')]
-    return () => cleanups.forEach((cleanup) => cleanup?.())
+    return animateBatch('.g_service')
   }, []);
 
   return (
@@ -25,57 +26,45 @@ const Services = () => {
           <p className="text-gray-200 text-xl md:text-2xl font-semibold mt-4">{t('services.subtitle')}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-flow-dense gap-4 md:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
           {services.map((service, i) => {
-            const isFeatured = featured.includes(service.id);
+            const isFeatured = service.featured;
             return (
-            <article
-              key={service.id}
-              className={`platform-card spotlight g_service overflow-hidden ${isFeatured ? 'md:col-span-2 bg-gradient-to-br from-[#1f0f06] via-neutral-950 to-neutral-950' : ''}`}
-            >
-              {isFeatured && (
-                <span className="absolute -right-4 -bottom-10 text-[11rem] leading-none font-bold text-white/[0.03] select-none" aria-hidden="true">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-              )}
-              <p className="text-forge text-sm font-semibold mb-4">{String(i + 1).padStart(2, '0')}</p>
-              <h3 className={`font-semibold mb-3 ${isFeatured ? 'text-3xl md:text-4xl max-w-lg' : 'text-2xl'}`}>{tr(service.title)}</h3>
-              <p className={`text-gray leading-relaxed mb-6 ${isFeatured ? 'text-lg max-w-xl' : ''}`}>{tr(service.description)}</p>
-              <div className="flex flex-wrap gap-2 mt-auto">
-                {service.tags.map((tag) => (
-                  <span key={tag} className="chip">{tag}</span>
-                ))}
-              </div>
-              {service.page && (
-                <SmartLink to={`/servicios/${service.page}`} className="text-link flex items-center text-sm font-semibold mt-6 relative z-10">
+              <SmartLink
+                key={service.id}
+                to={`/servicios/${service.page}`}
+                className={`platform-card spotlight group g_service overflow-hidden ${isFeatured ? 'md:col-span-2 bg-gradient-to-br from-[#1f0f06] via-neutral-950 to-neutral-950' : ''}`}
+              >
+                <p className="text-forge text-sm font-semibold mb-3 md:mb-4">{String(i + 1).padStart(2, '0')}</p>
+                <h3 className={`font-semibold mb-3 ${isFeatured ? 'text-3xl md:text-4xl max-w-lg' : 'text-2xl'}`}>{tr(service.title)}</h3>
+                <p className={`text-gray leading-relaxed mb-5 md:mb-6 ${isFeatured ? 'md:text-lg max-w-xl' : ''}`}>{tr(service.description)}</p>
+                <PriceTag price={getServicePage(service.page).price} className={`mt-auto mb-4 text-gray-200 ${isFeatured ? 'text-lg' : ''}`} />
+                <span className="text-link flex items-center text-sm font-semibold">
                   {t('pages.viewService')}
-                  <ArrowRightIcon className="ml-1" />
-                </SmartLink>
-              )}
-            </article>
+                  <ArrowRightIcon className="ml-1 transition-transform group-hover:translate-x-1" />
+                </span>
+              </SmartLink>
             );
           })}
-        </div>
 
-        <h3 className="text-gray text-3xl md:text-5xl font-medium mt-28 mb-10">{t('services.audiences')}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-          {audiences.map((audience) => (
-            <div key={audience.id} className="g_audience opacity-0 translate-y-[60px] border-t border-neutral-700 pt-6">
-              <p className="hiw-bigtext">{tr(audience.title)}</p>
-              <p className="hiw-text mt-3">{tr(audience.description)}</p>
-              {audience.page && (
-                <SmartLink to={`/servicios/${audience.page}`} className="text-link flex items-center text-base font-semibold mt-4">
-                  {t('pages.viewService')}
-                  <ArrowRightIcon className="ml-1" />
-                </SmartLink>
-              )}
+          <div className="g_service opacity-0 translate-y-[60px] md:col-span-2 flex flex-col sm:flex-row sm:items-end justify-between gap-6 rounded-3xl p-6 md:p-8 border border-forge/40 bg-gradient-to-br from-forge/15 via-neutral-950 to-neutral-950 shadow-[0_0_80px_-30px_rgba(255,106,26,0.5)]">
+            <div>
+              <h3 className="text-2xl md:text-3xl font-semibold">{t('services.ctaTitle')}</h3>
+              <p className="text-gray-200 mt-3 max-w-xl leading-relaxed">{t('services.ctaText')}</p>
             </div>
-          ))}
+            <a href="#contacto" className="btn !my-0 shrink-0">
+              {t('hero.cta')}
+              <ArrowRightIcon />
+            </a>
+          </div>
         </div>
 
-        <div className="flex-center mt-16">
-          <a href="#contacto" className="btn">{t('hero.cta')}</a>
-        </div>
+        <p className="text-gray text-sm font-semibold mt-14 mb-4">{t('services.more')}</p>
+        <ul className="flex flex-wrap gap-2">
+          {capabilities.map((capability) => (
+            <li key={capability.en} className="chip !text-sm !px-4 !py-2">{tr(capability)}</li>
+          ))}
+        </ul>
       </div>
     </section>
   )

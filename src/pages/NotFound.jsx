@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import Seo from '../components/Seo';
 import PageHeader from '../components/PageHeader';
+import SmartLink from '../components/SmartLink';
 import { ArrowRightIcon } from '../components/Icons';
 
 const NotFound = () => {
@@ -11,7 +11,7 @@ const NotFound = () => {
     <>
       <Seo title={t('notFound.title')} description={t('notFound.text')} path="/404" noindex />
       <PageHeader eyebrow="404" title={t('notFound.h1')} subtitle={t('notFound.text')}>
-        <Link to="/" className="btn !my-0">{t('notFound.back')}<ArrowRightIcon /></Link>
+        <SmartLink to="/" className="btn !my-0">{t('notFound.back')}<ArrowRightIcon /></SmartLink>
       </PageHeader>
     </>
   );

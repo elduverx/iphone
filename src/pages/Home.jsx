@@ -1,37 +1,51 @@
-import { lazy, Suspense } from 'react';
-import { ClientOnly } from 'vite-react-ssg';
 import Hero from '../components/Hero';
 import Highlights from '../components/Highlights';
-import AppStoreApps from '../components/AppStoreApps';
-import Features from '../components/Features';
-import CodeShowcase from '../components/CodeShowcase';
 import Services from '../components/Services';
-import Engagement from '../components/Engagement';
+import AppStoreApps from '../components/AppStoreApps';
 import HowItWorks from '../components/HowItWorks';
 import Testimonials from '../components/Testimonials';
 import Studio from '../components/Studio';
 import Faq from '../components/Faq';
 import Seo, { faqLd } from '../components/Seo';
-import { brand, contact, faqs } from '../constants';
+import { APP_STORE_DEVELOPER_URL, brand, contact, faqs, showPrices } from '../constants';
+import { getServicePage } from '../content/services';
+import { priceText } from '../utils';
 import { useLanguage } from '../i18n/LanguageContext';
+import { localizePath } from '../i18n/paths';
 
-// three.js va en un chunk aparte y solo se carga en el navegador
-const Model = lazy(() => import('../components/Model'));
-const modelFallback = <section className="common-padding min-h-[100vh]" />;
+const appPrice = getServicePage('desarrollo-apps-ios').price;
 
+// Orden pensado para quien llega desde un anuncio: qué hacemos, prueba de que lo hacemos bien,
+// cómo trabajamos y resolver dudas antes del formulario (que va en el layout, al final de cada página)
 const Home = () => {
-  const { t, tr } = useLanguage();
+  const { t, tr, lang } = useLanguage();
+  // el precio de partida en la descripción mejora el clic desde Google (solo donde se publican precios)
+  const description = showPrices[lang]
+    ? `${t('meta.description')} ${priceText(appPrice, lang, t('hero.mvp'), t('price.vat'))}.`
+    : t('meta.description');
+  const url = `${brand.url}${localizePath('/', lang)}`;
+
+  // nombre del sitio en los resultados de Google
+  const website = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: brand.name,
+    url,
+    inLanguage: lang,
+  };
 
   const organization = {
     '@context': 'https://schema.org',
     '@type': 'ProfessionalService',
     name: brand.name,
-    url: `${brand.url}/`,
-    logo: `${brand.url}/favicon.svg`,
-    image: `${brand.url}/og.png`,
+    url,
+    logo: `${brand.url}/logo.png`,
+    image: `${brand.url}${lang === 'en' ? '/og-en.png' : '/og.png'}`,
     email: contact.email,
     telephone: contact.phoneLabel.replace(/\s/g, ''),
-    description: t('meta.description'),
+    description,
+    ...(showPrices[lang] && { priceRange: lang === 'en' ? '$$' : '€€' }),
+    sameAs: [APP_STORE_DEVELOPER_URL],
     areaServed: 'Worldwide',
     address: { '@type': 'PostalAddress', addressCountry: 'ES' },
     knowsLanguage: ['es', 'en'],
@@ -42,24 +56,14 @@ const Home = () => {
     <>
       <Seo
         title={t('meta.title')}
-        description={t('meta.description')}
+        description={description}
         path="/"
-        jsonLd={[organization, faqLd(faqs.map((faq) => ({ q: tr(faq.q), a: tr(faq.a) })))]}
+        jsonLd={[website, organization, faqLd(faqs.map((faq) => ({ q: tr(faq.q), a: tr(faq.a) })))]}
       />
       <Hero />
       <Highlights />
-      <AppStoreApps />
-      <ClientOnly>
-        {() => (
-          <Suspense fallback={modelFallback}>
-            <Model />
-          </Suspense>
-        )}
-      </ClientOnly>
-      <Features />
-      <CodeShowcase />
       <Services />
-      <Engagement />
+      <AppStoreApps />
       <HowItWorks />
       <Testimonials />
       <Studio />

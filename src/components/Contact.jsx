@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react'
 import { animateWithGsap } from '../utils/animations';
 import { contact, needs } from '../constants';
 import { whatsappUrl } from '../utils';
+import { getAttribution, trackLead } from '../utils/tracking';
 import { useLanguage } from '../i18n/LanguageContext';
-import { ArrowRightIcon, ChatIcon } from './Icons';
+import { ArrowRightIcon, ChatIcon, CheckIcon } from './Icons';
 import SmartLink from './SmartLink';
 
 const MailIcon = () => (
@@ -25,34 +26,40 @@ const Contact = ({ defaultNeed = '' }) => {
   const { t, tr, lang } = useLanguage();
   const [status, setStatus] = useState('idle'); // idle | sending | success | error
   const [need, setNeed] = useState(defaultNeed);
+  // cuándo se mostró el formulario: el servidor descarta envíos instantáneos (bots)
+  const shownAt = useRef(0);
+
+  useEffect(() => {
+    shownAt.current = Date.now();
+  }, []);
 
   useGSAP(() => {
     animateWithGsap('#contact_title', { y: 0, opacity: 1 })
     animateWithGsap('.g_contact', { y: 0, opacity: 1, duration: 1, stagger: 0.15, ease: 'power2.inOut' })
   }, []);
 
+  // Lo envía la función /api/contact (Nodemailer) a nuestro buzón, con la página y la campaña de origen
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
-    const data = new FormData(form);
-    data.set('need', need || 'other');
-    data.set('language', lang);
-
-    // Sin Formspree configurado: abre el cliente de correo con el mensaje
-    if (!contact.formspreeId) {
-      const body = `${data.get('message')}\n\n— ${data.get('name')} (${data.get('email')}) · ${data.get('need')}`;
-      window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent('Swiftforge · ' + data.get('name'))}&body=${encodeURIComponent(body)}`;
-      return;
-    }
+    const payload = {
+      ...Object.fromEntries(new FormData(form)),
+      need: need || 'other',
+      language: lang,
+      page: window.location.pathname,
+      elapsed: Date.now() - shownAt.current,
+      ...getAttribution(),
+    };
 
     setStatus('sending');
     try {
-      const response = await fetch(`https://formspree.io/f/${contact.formspreeId}`, {
+      const response = await fetch('/api/contact', {
         method: 'POST',
-        body: data,
-        headers: { Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(response.statusText);
+      trackLead({ need: payload.need });
       form.reset();
       setNeed('');
       setStatus('success');
@@ -165,8 +172,8 @@ const Contact = ({ defaultNeed = '' }) => {
                   <textarea name="message" required rows={4} placeholder={t('contact.messagePlaceholder')} className="input resize-none" />
                 </label>
 
-                {/* honeypot anti-spam de Formspree */}
-                <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+                {/* trampa anti-spam: invisible para personas, los bots la rellenan */}
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
                 <button type="submit" disabled={status === 'sending'} className="btn !my-0 w-full !py-4 text-lg disabled:opacity-60">
                   {status === 'sending' ? t('contact.sending') : t('contact.send')}
@@ -175,7 +182,12 @@ const Contact = ({ defaultNeed = '' }) => {
 
                 {status === 'error' && <p role="alert" className="text-sm text-red-400 -mt-2">{t('contact.error')}</p>}
 
-                <p className="text-xs text-gray text-center -mt-2">
+                <p className="flex items-center justify-center gap-2 text-sm text-gray-200 font-semibold -mt-2">
+                  <CheckIcon width={16} height={16} />
+                  {t('contact.free')}
+                </p>
+
+                <p className="text-xs text-gray text-center -mt-3">
                   {t('contact.legal')}{' '}
                   <SmartLink to="/privacidad" className="text-link underline-offset-2 hover:underline">
                     {t('contact.privacyLink')}

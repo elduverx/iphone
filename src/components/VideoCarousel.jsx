@@ -1,10 +1,10 @@
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/all";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 import { useEffect, useRef, useState } from "react";
 
-import { carouselApps as apps } from "../constants";
+import { apps } from "../constants";
 import { useLanguage } from "../i18n/LanguageContext";
 import { ArrowRightIcon, PauseIcon, PlayIcon, ReplayIcon } from "./Icons";
 import SmartLink from "./SmartLink";
@@ -164,7 +164,7 @@ const VideoCarousel = () => {
                 <video
                   className="carousel-video w-full h-full object-cover object-[78%_50%] md:object-center pointer-events-none"
                   playsInline={true}
-                  preload="auto"
+                  preload="metadata"
                   muted
                   poster={app.poster}
                   ref={(el) => (videoRef.current[i] = el)}
@@ -195,6 +195,7 @@ const VideoCarousel = () => {
 
               <div className="absolute bottom-6 md:bottom-10 left-[5%] z-10 flex flex-col gap-3">
                 <div className="flex flex-wrap gap-2">
+                  {app.client && <span className="chip !bg-white !text-black">{t('store.client')}</span>}
                   {app.platforms.map((platform) => (
                     <span key={platform} className="chip">{platform}</span>
                   ))}

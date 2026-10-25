@@ -70,9 +70,3 @@ export const TVFrame = ({ children, className = '' }) => (
     <div className="w-[12em] h-[0.5em] rounded-full bg-[#2c2c2e]" />
   </div>
 );
-
-export const CarFrame = ({ children, className = '' }) => (
-  <div className={`relative w-[40em] h-[17em] rounded-[1.8em] p-[0.6em] bg-gradient-to-b from-[#2c2c2e] to-[#111] shadow-[0_3em_6em_-1.5em_rgba(0,0,0,0.9),inset_0_0_0_0.08em_rgba(255,255,255,0.12)] ${className}`}>
-    <div className="w-full h-full rounded-[1.3em] overflow-hidden bg-black">{children}</div>
-  </div>
-);

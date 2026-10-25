@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { logoMark } from '../utils';
 import { brand, navLists } from '../constants';
 import { useLanguage } from '../i18n/LanguageContext';
+import { localizePath } from '../i18n/paths';
 import LanguageToggle from './LanguageToggle';
 import SmartLink from './SmartLink';
 import { CloseIcon, MenuIcon } from './Icons';
 
 const Navbar = () => {
-  const { t, tr } = useLanguage();
+  const { t, tr, lang } = useLanguage();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState(null);
@@ -16,9 +17,12 @@ const Navbar = () => {
   // en la home, resalta el enlace de la sección visible
   useEffect(() => {
     setActiveSection(null);
-    if (pathname !== '/') return;
+    if (pathname.replace(/\/$/, '') !== localizePath('/', lang).replace(/\/$/, '')) return;
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach((entry) => entry.isIntersecting && setActiveSection(entry.target.id)),
+      (entries) => entries.forEach((entry) => {
+        const { id } = entry.target;
+        setActiveSection((prev) => (entry.isIntersecting ? id : prev === id ? null : prev));
+      }),
       { rootMargin: '-45% 0px -50% 0px' }
     );
     navLists.forEach(({ id }) => {
@@ -26,17 +30,17 @@ const Navbar = () => {
       if (section) observer.observe(section);
     });
     return () => observer.disconnect();
-  }, [pathname]);
+  }, [pathname, lang]);
 
-  const isActive = (nav) => (nav.to.startsWith('/#') ? activeSection === nav.id : pathname.startsWith(nav.to));
+  const isActive = (nav) => (nav.to.startsWith('/#') ? activeSection === nav.id : pathname.startsWith(localizePath(nav.to, lang)));
 
   return (
     <header className="sticky top-0 z-50 w-full sm:px-10 px-5 bg-black/70 backdrop-blur-xl border-b border-white/5">
       <nav className="flex w-full h-12 items-center screen-max-width">
-        <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
+        <SmartLink to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <img src={logoMark} alt="" width={22} height={22} />
-          <span className="text-sm font-semibold tracking-tight">{brand.name}</span>
-        </Link>
+          <span className="text-sm font-semibold tracking-tight max-[360px]:hidden">{brand.name}</span>
+        </SmartLink>
 
         <div className="flex flex-1 justify-center max-md:hidden">
           {navLists.map((nav) => (
@@ -52,10 +56,11 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-3 max-md:flex-1 max-md:justify-end">
+        <div className="flex items-center gap-2.5 sm:gap-3 max-md:flex-1 max-md:justify-end">
           <LanguageToggle />
-          <a href="#contacto" className="max-sm:hidden px-3.5 py-1.5 rounded-full bg-gradient-to-b from-[#FF8A3D] to-[#EE4F0C] text-xs font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] hover:brightness-110 transition-all">
-            {t('nav.cta')}
+          <a href="#contacto" onClick={() => setOpen(false)} className="whitespace-nowrap px-3.5 py-1.5 rounded-full bg-gradient-to-b from-[#FF8A3D] to-[#EE4F0C] text-xs font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] hover:brightness-110 transition-all">
+            <span className="sm:hidden">{t('nav.ctaShort')}</span>
+            <span className="max-sm:hidden">{t('nav.cta')}</span>
           </a>
           <button
             type="button"

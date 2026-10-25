@@ -1,8 +1,8 @@
-import { CarFrame, MacFrame, PhoneFrame, TabletFrame, TVFrame, VisionWindow, WatchFrame } from './DeviceFrames';
-import { CarPlayScreen, VideoScreen, VisionRoom, VisionTicTacToe } from './DeviceScreens';
+import { MacFrame, PhoneFrame, TabletFrame, TVFrame, VisionWindow, WatchFrame } from './DeviceFrames';
+import { VideoScreen, VisionRoom, VisionTicTacToe } from './DeviceScreens';
 
 // Tamaño base (px) de cada dispositivo: todo el marco va en em
-const deviceSizes = { iphone: 11, watch: 15, vision: 10.5, mac: 11.5, ipad: 10.5, tv: 11, carplay: 11.5 };
+const deviceSizes = { iphone: 11, watch: 15, vision: 10.5, mac: 11.5, ipad: 10.5, tv: 11 };
 
 const showcase = (name) => ({ src: `/assets/showcase/${name}.mp4`, poster: `/assets/showcase/${name}.jpg` });
 
@@ -21,8 +21,6 @@ const DeviceDemo = ({ device, media, label = '' }) => {
       return <TabletFrame portrait><VideoScreen {...video} label={label} /></TabletFrame>;
     case 'tv':
       return <TVFrame><VideoScreen {...video} label={label} /></TVFrame>;
-    case 'carplay':
-      return <CarFrame><CarPlayScreen /></CarFrame>;
     case 'vision':
       return (
         <div className="relative w-[50em] h-[34em] rounded-[2.4em] flex-center">

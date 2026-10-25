@@ -16,7 +16,7 @@ export const casePages = [
     shots: [1, 2, 3, 4].map((n) => `/assets/apps/tipson-audit/shots/${n}.jpg`),
     services: ["desarrollo-apps-ios", "rescate-apps-ios"],
     es: {
-      metaTitle: "Tipson Audit: revisión de contratos con IA en iPhone",
+      metaTitle: "Tipson Audit: revisión de contratos con IA",
       category: "Legal · Productividad",
       summary: "App para iPhone y iPad que revisa contratos con IA antes de firmarlos.",
       challenge: "Autónomos y pequeñas empresas firman contratos que no entienden del todo: plazos de pago abusivos, cesión total de la propiedad intelectual o tribunales en otro país. Pagar a un abogado por cada contrato no siempre es viable.",

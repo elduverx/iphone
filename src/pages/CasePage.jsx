@@ -4,6 +4,7 @@ import { casePages, getCasePage } from '../content/cases';
 import { getServicePage } from '../content/services';
 import { brand } from '../constants';
 import { useLanguage } from '../i18n/LanguageContext';
+import { localizePath } from '../i18n/paths';
 import { animateBatch } from '../utils/animations';
 import Seo, { breadcrumbLd } from '../components/Seo';
 import PageHeader from '../components/PageHeader';
@@ -21,7 +22,7 @@ const Block = ({ title, children }) => (
 
 const CasePage = () => {
   const { slug } = useParams();
-  const { t, tr } = useLanguage();
+  const { t, tr, lang } = useLanguage();
   const page = getCasePage(slug);
 
   useGSAP(() => {
@@ -48,12 +49,12 @@ const CasePage = () => {
     operatingSystem: page.platforms.join(', '),
     creator: { '@type': 'Organization', name: brand.name, url: `${brand.url}/` },
     ...(page.appStoreUrl ? { downloadUrl: page.appStoreUrl } : {}),
-    url: `${brand.url}${path}`,
+    url: `${brand.url}${localizePath(path, lang)}`,
   };
 
   return (
     <>
-      <Seo title={copy.metaTitle} description={`${copy.summary} ${copy.solution}`.slice(0, 158)} path={path} jsonLd={[workLd, breadcrumbLd(crumbs)]} />
+      <Seo title={copy.metaTitle} description={`${copy.summary} ${copy.solution}`} path={path} jsonLd={[workLd, breadcrumbLd(crumbs, lang)]} />
 
       <PageHeader
         crumbs={crumbs}

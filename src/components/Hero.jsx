@@ -1,51 +1,29 @@
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useRef } from 'react';
-import { platforms } from '../constants';
+import { contact, publishedApps, showPrices } from '../constants';
+import { getServicePage } from '../content/services';
+import { priceText, whatsappUrl } from '../utils';
 import { useLanguage } from '../i18n/LanguageContext';
-import Marquee from './Marquee';
-import { PlatformIcon } from './Icons';
-import { MacFrame, PhoneFrame, WatchFrame } from './devices/DeviceFrames';
-import { VideoScreen } from './devices/DeviceScreens';
+import { ArrowRightIcon, ChatIcon, CheckIcon } from './Icons';
 
-// Composición del ecosistema: cada capa tiene su posición y su profundidad para el parallax
-const heroDevices = [
-  {
-    id: 'mac',
-    depth: 0.35,
-    position: 'left-1/2 top-0 -translate-x-1/2 text-[6.4px] sm:text-[8px] md:text-[10px] lg:text-[11.5px]',
-    node: <MacFrame><VideoScreen src="/assets/showcase/mac.mp4" poster="/assets/showcase/mac.jpg" label="Horda Neón en Mac" /></MacFrame>,
-  },
-  {
-    id: 'watch',
-    depth: 1.3,
-    position: 'left-1/2 bottom-[4%] -translate-x-[175%] text-[6.5px] sm:text-[8px] md:text-[9.5px] lg:text-[10.5px]',
-    node: <WatchFrame><VideoScreen src="/assets/showcase/watch.mp4" poster="/assets/showcase/watch.jpg" label="Horda Neón en Apple Watch" /></WatchFrame>,
-  },
-  {
-    id: 'iphone',
-    depth: 1,
-    position: 'left-1/2 bottom-0 translate-x-[35%] text-[5.6px] sm:text-[7px] md:text-[8.5px] lg:text-[9.5px]',
-    node: <PhoneFrame><VideoScreen src="/assets/showcase/iphone.mp4" poster="/assets/showcase/iphone.jpg" label="Tipson Audit en iPhone" /></PhoneFrame>,
-  },
-];
+const appPrice = getServicePage('desarrollo-apps-ios').price;
+// Ejemplo real del hero: la app publicada que hicimos para un cliente
+const clientApp = publishedApps.find((app) => app.client && app.video);
 
+// La entrada del texto y los botones es CSS (.hero-in): se ve en cuanto llega el HTML, sin esperar a JavaScript
 const Hero = () => {
-  const { t } = useLanguage();
+  const { t, tr, lang } = useLanguage();
   const sectionRef = useRef();
+  const trust = [
+    `${publishedApps.length} ${t('hero.published')}`,
+    ...(showPrices[lang] ? [priceText(appPrice, lang, t('hero.mvp'), t('price.vat'))] : []),
+    ...t('hero.trust'),
+  ];
 
   useGSAP(() => {
-    gsap.to('#hero', { opacity: 1, delay: 0.3 })
-    gsap.to('#hero-headline', { opacity: 1, y: 0, duration: 1.2, delay: 0.5, ease: 'power3.out' })
-    gsap.from('.hero-device', { y: 160, opacity: 0, duration: 1.6, delay: 0.7, stagger: 0.15, ease: 'expo.out' })
-    gsap.to('#cta', { opacity: 1, y: 0, delay: 1.4 })
-    gsap.to('#hero-marquee', { opacity: 1, delay: 1.8, duration: 1 })
-
-    // flotación suave continua, cada dispositivo a su ritmo
-    gsap.to('.hero-float', { y: -12, duration: 3.2, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: 0.7 })
-
-    // al hacer scroll la composición se aleja
-    gsap.to('#hero-devices', {
+    // al hacer scroll el ejemplo se aleja
+    gsap.to('#hero-showcase', {
       scrollTrigger: { trigger: sectionRef.current, start: 'top top', end: 'bottom top', scrub: true },
       y: 120,
       scale: 0.94,
@@ -53,75 +31,93 @@ const Hero = () => {
     })
   }, { scope: sectionRef })
 
-  // parallax por capas con el ratón
-  const handlePointerMove = (e) => {
-    const rect = sectionRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    gsap.utils.toArray('.hero-device').forEach((el) => {
-      const depth = Number(el.dataset.depth);
-      gsap.to(el, { x: x * 40 * depth, y: y * 24 * depth, rotateY: x * 6, duration: 1.2, ease: 'power3.out' });
-    });
-    gsap.to('.glow-orb', { x: x * 60, y: y * 40, duration: 2, ease: 'power3.out' });
-  };
+  // Rótulo del proyecto: encima del vídeo en escritorio, debajo en móvil
+  const caption = (className) => (
+    <a href={clientApp.url} target="_blank" rel="noopener noreferrer" className={`group text-left ${className}`}>
+      <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-forge-light">
+        <span className="w-1.5 h-1.5 rounded-full bg-forge" />
+        {t('hero.clientLabel')}
+      </span>
+      <span className="flex items-center gap-3 mt-3">
+        <img src={clientApp.icon} alt="" width={48} height={48} className="w-12 h-12 rounded-[22%] border border-white/10" />
+        <span>
+          <span className="block text-xl font-semibold">{clientApp.name}</span>
+          <span className="block text-sm text-gray-200">{tr(clientApp.tagline)}</span>
+        </span>
+      </span>
+      <span className="text-link flex items-center gap-1 text-sm font-semibold mt-3">
+        {t('highlights.appStore')}
+        <ArrowRightIcon className="transition-transform group-hover:translate-x-1" />
+      </span>
+    </a>
+  );
 
   return (
     <section
       id="top"
       ref={sectionRef}
-      onPointerMove={handlePointerMove}
-      className="w-full nav-height bg-black relative overflow-hidden flex flex-col justify-center pt-10"
+      className="w-full bg-black relative overflow-hidden pt-12 md:pt-16 pb-16 md:pb-20"
     >
       <div className="absolute inset-0 grid-backdrop" aria-hidden="true" />
       <div className="glow-orb w-[40vw] h-[40vw] bg-forge/30 top-[30%] left-[30%]" aria-hidden="true" />
       <div className="glow-orb w-[30vw] h-[30vw] bg-ember/15 top-[45%] left-[50%] [animation-delay:-7s]" aria-hidden="true" />
 
-      <div className="relative w-full flex-center flex-col">
-        <p id="hero" className="hero-title flex items-center gap-2 !text-base md:!text-lg">
+      <div className="relative w-full flex-center flex-col px-5 text-center">
+        <p className="hero-in flex items-center gap-2 text-gray-100 font-semibold text-sm md:text-lg">
           <span className="w-2 h-2 rounded-full bg-forge animate-pulse" />
           {t('hero.eyebrow')}
         </p>
-        <h1 id="hero-headline" className="hero-headline">
-          <span className="text-gradient-forge">{t('hero.title')}</span>
+        <h1 className="hero-in hero-headline [animation-delay:80ms]">
+          {t('hero.title')}{' '}
+          <span className="text-gradient-forge">{t('hero.titleAccent')}</span>
         </h1>
-        <p className="text-gray text-center text-base md:text-xl font-semibold px-5 max-w-2xl">{t('hero.subtitle')}</p>
+        <p className="hero-in text-gray-200 text-base md:text-xl font-semibold max-w-2xl [animation-delay:160ms]">{t('hero.subtitle')}</p>
 
-        <div className="w-full [perspective:1400px]">
-          <div id="hero-devices" className="relative mx-auto mt-8 mb-4 w-full max-w-5xl h-[250px] sm:h-[320px] md:h-[400px] lg:h-[440px]">
-            {heroDevices.map((device) => (
-              <div key={device.id} className={`absolute ${device.position}`}>
-                <div className="hero-device" data-depth={device.depth}>
-                  <div className="hero-float">{device.node}</div>
-                </div>
-              </div>
-            ))}
+        <div className="hero-in flex flex-col sm:flex-row justify-center gap-3 mt-7 w-full sm:w-auto [animation-delay:240ms]">
+          <a href="#contacto" className="btn !my-0 !py-3.5 text-lg">
+            {t('hero.cta')}
+            <ArrowRightIcon />
+          </a>
+          <a href={whatsappUrl(contact.whatsapp, t('contact.whatsappMessage'))} target="_blank" rel="noopener noreferrer" className="btn-ghost !my-0 !py-3.5">
+            <ChatIcon width={20} height={20} className="text-[#25D366]" />
+            {t('hero.whatsapp')}
+          </a>
+        </div>
+
+        <a href="#servicios" className="hero-in group text-link flex items-center gap-1 mt-5 text-sm md:text-base font-semibold max-w-xl [animation-delay:280ms]">
+          {t('hero.fixLink')}
+          <ArrowRightIcon className="shrink-0 transition-transform group-hover:translate-x-1" />
+        </a>
+
+        <ul className="hero-in flex flex-wrap justify-center gap-x-5 gap-y-2 mt-6 text-sm text-gray-200 [animation-delay:320ms]">
+          {trust.map((item) => (
+            <li key={item} className="flex items-center gap-1.5">
+              <CheckIcon width={16} height={16} />
+              {item}
+            </li>
+          ))}
+        </ul>
+
+        <div className="hero-rise w-full max-w-5xl mt-12 [animation-delay:400ms]">
+          <div id="hero-showcase">
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-[0_40px_120px_-30px_rgba(124,77,255,0.45)]">
+              <video
+                src={clientApp.video}
+                poster={clientApp.featured.image}
+                aria-label={clientApp.name}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                className="w-full aspect-[4/3] md:aspect-video object-cover object-[88%_50%] md:object-center"
+              />
+              {/* el vídeo deja la mitad izquierda oscura: ahí va el rótulo en escritorio */}
+              {caption('max-md:hidden absolute left-10 top-1/2 -translate-y-1/2 max-w-[34%]')}
+            </div>
+            {caption('md:hidden block mt-5')}
           </div>
         </div>
-      </div>
-
-      <div
-        id="cta"
-        className="relative flex flex-col items-center opacity-0 translate-y-10 px-5"
-      >
-        <div className="flex flex-wrap justify-center gap-x-4">
-          <a href="#contacto" className="btn">{t('hero.cta')}</a>
-          <a href="#apps" className="btn-ghost">{t('hero.secondary')}</a>
-        </div>
-        <p className="font-normal text-base md:text-lg text-center text-gray">{t('hero.note')}</p>
-      </div>
-
-      <div id="hero-marquee" className="relative mt-12 opacity-0 border-y border-white/5 py-5">
-        <Marquee
-          items={platforms}
-          duration={35}
-          renderItem={(platform) => (
-            <span className="flex items-center gap-3 px-8 text-gray-200 font-semibold">
-              <PlatformIcon id={platform.id} width={22} height={22} strokeWidth={1.5} />
-              {platform.name}
-              {platform.os !== platform.name && <span className="text-gray text-sm font-normal">{platform.os}</span>}
-            </span>
-          )}
-        />
       </div>
     </section>
   )
