@@ -1,7 +1,12 @@
-// Textos legales base (LSSI-CE y RGPD). TODO: completar los datos entre corchetes
-// y revisarlos con un asesor antes de publicar.
+// Textos legales base (LSSI-CE y RGPD). Revísalos con un asesor antes de publicar.
 import { brand, contact, tracking } from "./index";
 
+// Titular del sitio: la LSSI obliga a publicar nombre, NIF/NIE, domicilio y email
+const owner = {
+  name: "iOS Craft Spain",
+  taxId: "Z0550250A",
+  address: "C/ Madrid, 8, Benetússer (Valencia)",
+};
 const email = contact.email;
 
 // La política de cookies cambia según las herramientas de medición configuradas
@@ -46,13 +51,13 @@ export const legal = {
     },
     body: {
       es: [
-        `Titular: [Nombre y apellidos / razón social] · NIF: [NIF] · Domicilio: [Dirección] · Email: ${email}.`,
+        `Titular: ${owner.name} · NIF: ${owner.taxId} · Domicilio: ${owner.address} · Email: ${email}.`,
         "Este sitio web informa sobre los servicios de desarrollo de software de Swiftcraft. El acceso es gratuito y no requiere registro.",
         "Los contenidos, el diseño y el código del sitio son propiedad del titular o se usan con licencia. iPhone, iPad, Mac, Apple Watch, Apple TV, Vision Pro y CarPlay son marcas de Apple Inc.; Swiftcraft no está afiliado a Apple.",
         "El titular no se responsabiliza del uso indebido de los contenidos ni de los sitios de terceros enlazados.",
       ],
       en: [
-        `Owner: [Full name / company name] · Tax ID: [NIF] · Address: [Address] · Email: ${email}.`,
+        `Owner: ${owner.name} · Tax ID (NIF): ${owner.taxId} · Address: ${owner.address}, Spain · Email: ${email}.`,
         "This website provides information about Swiftcraft's software development services. Access is free and requires no registration.",
         "The site's content, design and code belong to the owner or are used under license. iPhone, iPad, Mac, Apple Watch, Apple TV, Vision Pro and CarPlay are trademarks of Apple Inc.; Swiftcraft is not affiliated with Apple.",
         "The owner is not liable for misuse of the content or for linked third-party sites.",
@@ -67,14 +72,14 @@ export const legal = {
     },
     body: {
       es: [
-        `Responsable: [Nombre y apellidos / razón social], NIF [NIF], ${email}.`,
+        `Responsable: ${owner.name}, NIF ${owner.taxId}, ${email}.`,
         "Datos: los que envías en el formulario de contacto (nombre, email y mensaje) o por WhatsApp. Junto al formulario se envía la página desde la que escribes y, si llegas desde un anuncio o un enlace con etiquetas de campaña, de qué campaña vienes.",
         "Finalidad y base legal: responder a tu solicitud y preparar un presupuesto, como medida precontractual a petición tuya (art. 6.1.b RGPD), y saber qué campañas funcionan, por interés legítimo (art. 6.1.f RGPD). Los datos se conservan mientras dure la relación comercial o hasta que pidas su supresión.",
         `Encargados: la web y el envío del formulario funcionan sobre Vercel Inc. (EE. UU.), con cláusulas contractuales tipo para las transferencias internacionales, y el mensaje llega a nuestro buzón a través de nuestro proveedor de correo.${tools.length ? ` Si aceptas las cookies de medición, ${providers.es} tratan datos de navegación según la política de cookies.` : ""} No se ceden datos a terceros salvo obligación legal.`,
         `Derechos: puedes ejercer acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a ${email}, y reclamar ante la AEPD (aepd.es).`,
       ],
       en: [
-        `Controller: [Full name / company name], Tax ID [NIF], ${email}.`,
+        `Controller: ${owner.name}, Tax ID (NIF) ${owner.taxId}, ${email}.`,
         "Data: what you submit through the contact form (name, email and message) or via WhatsApp. The form also sends the page you write from and, if you arrive from an ad or a link with campaign tags, which campaign you came from.",
         "Purpose and legal basis: replying to your request and preparing a quote, as a pre-contractual step at your request (Art. 6.1.b GDPR), and learning which campaigns work, on the basis of legitimate interest (Art. 6.1.f GDPR). Data is kept for the duration of the business relationship or until you ask for its deletion.",
         `Processors: the website and form delivery run on Vercel Inc. (USA), under standard contractual clauses for international transfers, and the message reaches our inbox through our email provider.${tools.length ? ` If you accept measurement cookies, ${providers.en} process browsing data as described in the cookie policy.` : ""} Data is not shared with third parties unless legally required.`,
